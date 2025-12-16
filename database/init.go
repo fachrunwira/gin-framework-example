@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/fachrunwira/go-query-builder/builder"
 	_ "github.com/go-sql-driver/mysql"
 )
 
@@ -15,15 +16,11 @@ type DatabaseOptions struct {
 	MaxConnectionLifetime time.Duration
 }
 
-type databaseCon struct {
-	*sql.DB
-}
-
 type dbKey string
 
-const ctxDbValue dbKey = "database"
+const CtxValueDB dbKey = "database"
 
-var instance *databaseCon
+var instance *sql.DB
 
 func Init(options *DatabaseOptions) error {
 	conf := getConfig()
@@ -47,23 +44,24 @@ func Init(options *DatabaseOptions) error {
 		db.SetConnMaxLifetime(2 * time.Minute)
 	}
 
-	instance = &databaseCon{db}
+	instance = db
 	return nil
 }
 
 func Inject(ctx context.Context) context.Context {
-	return context.WithValue(ctx, ctxDbValue, instance)
+	builder.SetContextKey(CtxValueDB)
+	return context.WithValue(ctx, CtxValueDB, instance)
 }
 
 func Close() error {
 	if instance != nil {
-		return instance.DB.Close()
+		return instance.Close()
 	}
 	return nil
 }
 
 func FromContext(ctx context.Context) (*sql.DB, error) {
-	db, ok := ctx.Value(ctxDbValue).(*sql.DB)
+	db, ok := ctx.Value(CtxValueDB).(*sql.DB)
 	if !ok {
 		return nil, fmt.Errorf("database not found in context")
 	}
@@ -71,10 +69,6 @@ func FromContext(ctx context.Context) (*sql.DB, error) {
 	return db, nil
 }
 
-func GetInstance() *databaseCon {
-	return instance
-}
-
 func GetDB() *sql.DB {
-	return instance.DB
+	return instance
 }

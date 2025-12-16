@@ -10,12 +10,12 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/fachrunwira/ebookamd-api/database"
-	"github.com/fachrunwira/ebookamd-api/lib/env"
-	"github.com/fachrunwira/ebookamd-api/lib/logger"
-	"github.com/fachrunwira/ebookamd-api/middlewares"
-	"github.com/fachrunwira/ebookamd-api/middlewares/ratelimit"
-	"github.com/fachrunwira/ebookamd-api/routes"
+	"github.com/fachrunwira/gin-example/database"
+	"github.com/fachrunwira/gin-example/lib/env"
+	"github.com/fachrunwira/gin-example/lib/logger"
+	"github.com/fachrunwira/gin-example/middlewares"
+	"github.com/fachrunwira/gin-example/middlewares/ratelimit"
+	"github.com/fachrunwira/gin-example/routes"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 	"golang.org/x/time/rate"
@@ -59,7 +59,7 @@ func main() {
 
 	port := env.GetEnv("APP_PORT", "8080")
 
-	g.Run(port)
+	g.Run(":" + port)
 
 	// Gracefull shutdown
 	server := &http.Server{

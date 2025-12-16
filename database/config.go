@@ -1,6 +1,6 @@
 package database
 
-import "github.com/fachrunwira/ebookamd-api/lib/env"
+import "github.com/fachrunwira/gin-example/lib/env"
 
 type dbConfig struct {
 	connection string

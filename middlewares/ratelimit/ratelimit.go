@@ -115,7 +115,7 @@ func (cl *clientLimiter) Middleware() gin.HandlerFunc {
 	}
 }
 
-func (cl *clientLimiter) setMessageLog(message string, args ...interface{}) {
+func (cl *clientLimiter) setMessageLog(message string, args ...any) {
 	if cl.logger != nil {
 		cl.logger.Info(message, args...)
 	}

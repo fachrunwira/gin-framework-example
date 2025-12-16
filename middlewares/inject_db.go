@@ -1,7 +1,7 @@
 package middlewares
 
 import (
-	"github.com/fachrunwira/ebookamd-api/database"
+	"github.com/fachrunwira/gin-example/database"
 	"github.com/gin-gonic/gin"
 )
 
