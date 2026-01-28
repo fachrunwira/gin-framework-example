@@ -5,6 +5,7 @@ import (
 	"errors"
 
 	"github.com/fachrunwira/go-query-builder/builder"
+	"github.com/fachrunwira/go-query-builder/clauseoperators"
 	"github.com/gin-gonic/gin"
 )
 
@@ -31,7 +32,7 @@ func (uc *userControllers) List(c *gin.Context) {
 	result, err := builder.
 		MakeWithContext(ctx).
 		Table("users").
-		Where("id", singleUser.ID).
+		Where("id", clauseoperators.EQUAL, 1).
 		First()
 
 	if err != nil {
