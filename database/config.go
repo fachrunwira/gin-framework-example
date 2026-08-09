@@ -1,6 +1,8 @@
 package database
 
-import "github.com/fachrunwira/gin-example/lib/env"
+import (
+	"github.com/fachrunwira/gin-example/lib/env"
+)
 
 type dbConfig struct {
 	connection string
@@ -13,11 +15,11 @@ type dbConfig struct {
 
 func getConfig() dbConfig {
 	return dbConfig{
-		connection: env.GetEnv("DATABASE_CONNECTION", "mysql"),
-		host:       env.GetEnv("DATABASE_HOST", "localhost"),
-		username:   env.GetEnv("DATABASE_USERNAME", "root"),
-		password:   env.GetEnv("DATABASE_PASSWORD", ""),
-		dbName:     env.GetEnv("DATABASE_NAME", ""),
-		port:       env.GetEnv("DATABASE_PORT", "3306"),
+		connection: env.Get("DATABASE_CONNECTION", "mysql"),
+		host:       env.Get("DATABASE_HOST", "localhost"),
+		username:   env.Get("DATABASE_USERNAME", "root"),
+		password:   env.Get("DATABASE_PASSWORD", ""),
+		dbName:     env.Get("DATABASE_NAME", ""),
+		port:       env.Get("DATABASE_PORT", "3306"),
 	}
 }

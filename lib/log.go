@@ -1,4 +1,4 @@
-package logger
+package lib
 
 import (
 	"log/slog"
@@ -6,7 +6,7 @@ import (
 	"gopkg.in/natefinch/lumberjack.v2"
 )
 
-func New(filename string, level slog.Level) *slog.Logger {
+func NewLogger(filename string, level slog.Level) *slog.Logger {
 	lumberjackLogger := &lumberjack.Logger{
 		Filename:   filename,
 		MaxSize:    10,   // Max file size before rotation

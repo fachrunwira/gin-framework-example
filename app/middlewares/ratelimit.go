@@ -1,4 +1,4 @@
-package ratelimit
+package middlewares
 
 import (
 	"context"
@@ -23,17 +23,24 @@ type clientLimiter struct {
 	burst           int
 	cleanupInterval time.Duration
 	entryTTL        time.Duration
+	excluded        map[string]struct{}
 	abort           context.CancelFunc
 	logger          *slog.Logger
 }
 
-func New(r rate.Limit, b int, interval, ttl time.Duration, logs *slog.Logger) *clientLimiter {
+func NewRateLimit(r rate.Limit, b int, interval, ttl time.Duration, exclude []string, logs *slog.Logger) *clientLimiter {
+	excl := make(map[string]struct{}, len(exclude))
+	for _, path := range exclude {
+		excl[path] = struct{}{}
+	}
+
 	cl := &clientLimiter{
 		clients:         make(map[string]*clientEntry),
 		rate:            r,
 		burst:           b,
 		cleanupInterval: interval,
 		entryTTL:        ttl,
+		excluded:        excl,
 		logger:          logs,
 	}
 
@@ -68,7 +75,7 @@ func (cl *clientLimiter) cleanup() {
 	total := len(cl.clients)
 
 	for ip, entry := range cl.clients {
-		if time.Since(entry.lastSeen) > 5*time.Minute {
+		if time.Since(entry.lastSeen) > cl.entryTTL {
 			delete(cl.clients, ip)
 			removed++
 			cl.setMessageLog("removed staled", "client", ip, "(last seen", time.Since(entry.lastSeen), ") ago")
@@ -99,6 +106,11 @@ func (cl *clientLimiter) startCleanup(ctx context.Context) {
 
 func (cl *clientLimiter) Middleware() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
+		if _, ok := cl.excluded[ctx.FullPath()]; ok {
+			ctx.Next()
+			return
+		}
+
 		ip := ctx.ClientIP()
 		limiter := cl.getLimiter(ip)
 

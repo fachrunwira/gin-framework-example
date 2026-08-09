@@ -1,11 +1,11 @@
-package auth
+package lib
 
 import (
 	"fmt"
 	"maps"
 	"time"
 
-	libenv "github.com/fachrunwira/gin-example/lib/env"
+	"github.com/fachrunwira/gin-example/lib/env"
 	"github.com/golang-jwt/jwt/v5"
 )
 
@@ -13,7 +13,7 @@ func GenerateToken(claims *jwt.MapClaims) (string, error) {
 	newClaims := jwt.MapClaims{
 		"iat": time.Now().Unix(),
 		"exp": time.Now().Add(24 * time.Hour).Unix(),
-		"iss": libenv.GetEnv("APP_URL", "http://localhost"),
+		"iss": env.Get("APP_URL", "http://localhost"),
 	}
 
 	if claims != nil {
@@ -21,7 +21,7 @@ func GenerateToken(claims *jwt.MapClaims) (string, error) {
 	}
 
 	generate := jwt.NewWithClaims(jwt.SigningMethodHS512, newClaims)
-	key := libenv.GetEnv("APP_KEY", "")
+	key := env.Get("APP_KEY", "")
 	if key == "" {
 		return "", fmt.Errorf("cannot generate token APP_KEY must be set first")
 	}
@@ -33,10 +33,10 @@ func GenerateToken(claims *jwt.MapClaims) (string, error) {
 	return token, nil
 }
 
-func ValidateToken(signedToken string) (*jwt.Token, map[string]any, error) {
-	key := libenv.GetEnv("APP_KEY", "")
+func ValidateToken(signedToken string) (map[string]any, error) {
+	key := env.Get("APP_KEY", "")
 	if key == "" {
-		return nil, map[string]any{}, fmt.Errorf("cannot validate token APP_KEY must be set first")
+		return map[string]any{}, fmt.Errorf("cannot validate token APP_KEY must be set first")
 	}
 
 	parseToken, err := jwt.Parse(signedToken, func(t *jwt.Token) (any, error) {
@@ -44,18 +44,18 @@ func ValidateToken(signedToken string) (*jwt.Token, map[string]any, error) {
 			return nil, fmt.Errorf("invalid signing method")
 		}
 
-		return key, nil
+		return []byte(key), nil
 	})
 
 	if err != nil {
-		return nil, map[string]any{}, fmt.Errorf("failed to validate token: %w", err)
+		return map[string]any{}, fmt.Errorf("failed to validate token: %w", err)
 	}
 
 	if claims, ok := parseToken.Claims.(jwt.MapClaims); ok && parseToken.Valid {
 		newClaims := map[string]any(claims)
 
-		return parseToken, newClaims, nil
+		return newClaims, nil
 	}
 
-	return nil, map[string]any{}, fmt.Errorf("invalid token")
+	return map[string]any{}, fmt.Errorf("invalid token")
 }

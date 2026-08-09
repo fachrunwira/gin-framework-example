@@ -1,13 +1,11 @@
 package database
 
 import (
-	"context"
 	"database/sql"
 	"fmt"
 	"time"
 
-	"github.com/fachrunwira/go-query-builder/builder"
-	_ "github.com/go-sql-driver/mysql"
+	"github.com/go-sql-driver/mysql"
 )
 
 type DatabaseOptions struct {
@@ -25,7 +23,14 @@ var instance *sql.DB
 func Init(options *DatabaseOptions) error {
 	conf := getConfig()
 
-	db, err := sql.Open(conf.connection, fmt.Sprintf("%s:%s@tcp(%s:%s)/%s", conf.username, conf.password, conf.host, conf.port, conf.dbName))
+	dsn := mysql.NewConfig()
+	dsn.User = conf.username
+	dsn.DBName = conf.dbName
+	dsn.Addr = fmt.Sprintf("%s:%s", conf.host, conf.port)
+	dsn.Passwd = conf.password
+	dsn.ParseTime = true
+
+	db, err := sql.Open(conf.connection, dsn.FormatDSN())
 	if err != nil {
 		return err
 	}
@@ -48,25 +53,11 @@ func Init(options *DatabaseOptions) error {
 	return nil
 }
 
-func Inject(ctx context.Context) context.Context {
-	builder.SetContextKey(CtxValueDB)
-	return context.WithValue(ctx, CtxValueDB, instance)
-}
-
 func Close() error {
 	if instance != nil {
 		return instance.Close()
 	}
 	return nil
-}
-
-func FromContext(ctx context.Context) (*sql.DB, error) {
-	db, ok := ctx.Value(CtxValueDB).(*sql.DB)
-	if !ok {
-		return nil, fmt.Errorf("database not found in context")
-	}
-
-	return db, nil
 }
 
 func GetDB() *sql.DB {

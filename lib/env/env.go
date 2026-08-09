@@ -5,7 +5,7 @@ import (
 	"os"
 )
 
-func GetEnv(key, defaultValue string) string {
+func Get(key, defaultValue string) string {
 	if val := os.Getenv(key); val != "" {
 		return val
 	}
@@ -13,7 +13,7 @@ func GetEnv(key, defaultValue string) string {
 	return defaultValue
 }
 
-func GetEnvInt(key string, defaultValue int) int {
+func GetInt(key string, defaultValue int) int {
 	if val := os.Getenv(key); val != "" {
 		var valInt int
 		fmt.Scanf(val, "%d", valInt)
